@@ -1,13 +1,14 @@
 from typing import Any
 from queue import Queue
-
+import sys
 
 class CSP:
     def __init__(
         self,
+        edges: list[tuple[str, str]],
         variables: list[str],
         domains: dict[str, set],
-        edges: list[tuple[str, str]],
+        
     ):
         """Constructs a CSP instance with the given variables, domains and edges.
         
@@ -20,6 +21,8 @@ class CSP:
         edges : list[tuple[str, str]]
             Pairs of variables that must not be assigned the same value
         """
+        # sys.setrecursionlimit(100000)
+        # print(variables)
         self.variables = variables
         self.domains = domains
 
@@ -63,11 +66,47 @@ class CSP:
         None | dict[str, Any]
             A solution if any exists, otherwise None
         """
-        def backtrack(assignment: dict[str, Any]):
+        def backtrack(assignment: dict[str, Any], c):
+            # print(assignment)
+            # print(sys.getrecursionlimit())
             # YOUR CODE HERE (and remove the assertion below)
-            assert False, "Not implemented"
+            # assert False, "Not implemented"
+            # if reject(P, c) then return
+            # if accept(P, c) then output(P, c)
+            # s ← first(P, c)
+            # while s ≠ NULL do
+            #     backtrack(P, s)
+            #     s ← next(P, s)
+            
+            # check if current assignment is valid
+            for i in self.binary_constraints:
+                if i[0] not in assignment.keys() or i[1] not in assignment.keys():
+                    continue
+                if assignment[i[0]]==assignment[i[1]]:
+                    # print(self.variables[self.variables.index(c)-1])
+                    assignment.pop(self.variables[self.variables.index(c)-1])
+                    return
+            # check if all variables hav a value, if true return value
+            for i in self.variables:
+                if i not in assignment.keys():
+                    break
+            else:
+                return assignment
+            # if not try each valid value from its domain
+            for i in self.domains[c]:
+                assignment[c] = i
+                # keep trying end options
+                if(self.variables.index(c)+1 == len(self.variables)):
+                    a = backtrack(assignment, self.variables[self.variables.index(c)])
+                else:     
+                    a = backtrack(assignment, self.variables[self.variables.index(c)+1])
+                if a:
+                    return a
 
-        return backtrack({})
+            
+
+
+        return backtrack({}, self.variables[0])
 
 
 def alldiff(variables: list[str]) -> list[tuple[str, str]]:
