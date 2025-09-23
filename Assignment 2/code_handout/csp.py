@@ -68,7 +68,9 @@ class CSP:
                     toDiscard.append(i)
                     change = True
             for i in toDiscard:
+
                 self.domains[x].discard(i)
+                
             return change
         
         worklist = Queue(0)
@@ -77,12 +79,13 @@ class CSP:
         # print(worklist)
         i = 0
         # yeah, while is kinda bad, but i did not expect vscode to cocistently crash
-        while worklist.not_empty:
+        while not worklist.empty():
             # i = i+1
             # if i == 2:
             #     break
  
             arc = worklist.get()
+            # print(worklist.empty())
             if arc_reduce(arc[0], arc[1]):
                 if(len(self.domains[arc[0]]) == 0  or len(self.domains[arc[1]]) == 0):
                     return False
@@ -94,6 +97,7 @@ class CSP:
                         elif arc[0] == i[1]:
                             if i[0] != arc[1]:
                                 worklist.put((i[0], i[1]))
+        # print(self.domains)
         return True
         
                     
@@ -106,55 +110,58 @@ class CSP:
         None | dict[str, Any]
             A solution if any exists, otherwise None
         """
+        # print(self.domains)
         def backtrack(assignment: dict[str, Any], c):
-            # print(assignment)
-            # print(sys.getrecursionlimit())
-            # YOUR CODE HERE (and remove the assertion below)
-            # assert False, "Not implemented"
-            # if reject(P, c) then return
-            # if accept(P, c) then output(P, c)
-            # s ← first(P, c)
-            # while s ≠ NULL do
-            #     backtrack(P, s)
-            #     s ← next(P, s)
-            
-            # check if current assignment is valid
             for i in self.edges:
                 if i[0] not in assignment.keys() or i[1] not in assignment.keys():
                     continue
+
                 if assignment[i[0]]==assignment[i[1]]:
+
                     # print(self.variables[self.variables.index(c)-1])
-                    assignment.pop(self.variables[self.variables.index(c)-1])
+
+                    assignment.pop(self.variables[self.variables.index(c)-1], None)
+
                     return
+
+
             for i in assignment.keys():
                 for j in assignment.keys():
                     if i==j:
                         continue
                     else:
                         # handout code for validating constraint
-                        if ((i, j) in self.binary_constraints and (assignment[i], assignment[j]) not in self.binary_constraints[(i, j)]) or ((j, i) in self.binary_constraints and(assignment[i], assignment[j]) not in self.binary_constraints[(j, i)]):
-                            assignment.pop(self.variables[self.variables.index(c)-1])
+                        if ((i, j) in self.edges and assignment[i]==assignment[j]) or ((j,i) in self.edges and assignment[i]==assignment[j]):
+                            assignment.pop(self.variables[self.variables.index(c)-1], None)
                             return
+
             # check if all variables hav a value, if true return value
+
             for i in self.variables:
+
                 if i not in assignment.keys():
+
                     break
+
             else:
+                
                 return assignment
+
             # if not try each valid value from its domain
+
             for i in self.domains[c]:
+                
                 assignment[c] = i
+                print(assignment)
                 # keep trying end options
+
                 if(self.variables.index(c)+1 == len(self.variables)):
                     a = backtrack(assignment, self.variables[self.variables.index(c)])
                 else:     
                     a = backtrack(assignment, self.variables[self.variables.index(c)+1])
+                print(a)
                 if a:
                     return a
-
-            
-
-
         return backtrack({}, self.variables[0])
 
 
