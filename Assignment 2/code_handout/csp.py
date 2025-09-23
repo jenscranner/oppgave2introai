@@ -1,6 +1,6 @@
 from typing import Any
 from queue import Queue
-import sys
+
 
 class CSP:
     def __init__(
@@ -25,6 +25,7 @@ class CSP:
         # print(variables)
         self.variables = variables
         self.domains = domains
+        self.edges = edges
 
         # Binary constraints as a dictionary mapping variable pairs to a set of value pairs.
         #
@@ -56,7 +57,46 @@ class CSP:
             False if a domain becomes empty, otherwise True
         """
         # YOUR CODE HERE (and remove the assertion below)
-        assert False, "Not implemented"
+        def arc_reduce(x, y):
+            change = False
+            toDiscard = []
+            for i in self.domains[x]:
+                for j in self.domains[y]:
+                    if i != j:
+                        break
+                else:
+                    toDiscard.append(i)
+                    change = True
+            for i in toDiscard:
+                self.domains[x].discard(i)
+            return change
+        
+        worklist = Queue(0)
+        for i in self.edges:
+            worklist.put(i)
+        # print(worklist)
+        i = 0
+        # yeah, while is kinda bad, but i did not expect vscode to cocistently crash
+        while worklist.not_empty:
+            # i = i+1
+            # if i == 2:
+            #     break
+ 
+            arc = worklist.get()
+            if arc_reduce(arc[0], arc[1]):
+                if(len(self.domains[arc[0]]) == 0  or len(self.domains[arc[1]]) == 0):
+                    return False
+                else:
+                    for i in self.edges:
+                        if arc[0]==i[0]:
+                            if i[1]!= arc[1]:
+                                worklist.put((i[1], i[0]))
+                        elif arc[0] == i[1]:
+                            if i[0] != arc[1]:
+                                worklist.put((i[0], i[1]))
+        return True
+        
+                    
 
     def backtracking_search(self) -> None | dict[str, Any]:
         """Performs backtracking search on the CSP.
@@ -79,13 +119,22 @@ class CSP:
             #     s ← next(P, s)
             
             # check if current assignment is valid
-            for i in self.binary_constraints:
+            for i in self.edges:
                 if i[0] not in assignment.keys() or i[1] not in assignment.keys():
                     continue
                 if assignment[i[0]]==assignment[i[1]]:
                     # print(self.variables[self.variables.index(c)-1])
                     assignment.pop(self.variables[self.variables.index(c)-1])
                     return
+            for i in assignment.keys():
+                for j in assignment.keys():
+                    if i==j:
+                        continue
+                    else:
+                        # handout code for validating constraint
+                        if ((i, j) in self.binary_constraints and (assignment[i], assignment[j]) not in self.binary_constraints[(i, j)]) or ((j, i) in self.binary_constraints and(assignment[i], assignment[j]) not in self.binary_constraints[(j, i)]):
+                            assignment.pop(self.variables[self.variables.index(c)-1])
+                            return
             # check if all variables hav a value, if true return value
             for i in self.variables:
                 if i not in assignment.keys():
