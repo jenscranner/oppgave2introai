@@ -81,7 +81,7 @@ class CSP:
                     return var
             return None
 
-        def check_constraints(assignment: dict[str, set], var: str, val: int) -> bool:
+        def check_constraints(assignment: dict[str, set], var: str, val: int):
             for other in self.variables: #Others, i.e not itself
                 if other == var: #Dont check against itself
                     continue
@@ -93,10 +93,10 @@ class CSP:
             return True
         
 
-        def copy_domains(assignment: dict[str, Any]) -> dict[str, set]:
+        def copy_domains(assignment: dict[str, Any]):
             return {k: set(v) for k, v in assignment.items()} #Copies domains so we can undo
 
-        def solved (assignment: dict[str, Any]) -> bool:
+        def solved (assignment: dict[str, Any]):
             return all(len(s) == 1 for s in assignment.values())
 
         def backtrack(assignment: dict[str, Any]):
