@@ -103,6 +103,8 @@ class CSP:
                     
 
     def backtracking_search(self) -> None | dict[str, Any]:
+        # print(self.edges)
+        # print(self.domains)
         """Performs backtracking search on the CSP.
         
         Returns
@@ -111,58 +113,43 @@ class CSP:
             A solution if any exists, otherwise None
         """
         # print(self.domains)
-        def backtrack(assignment: dict[str, Any], c):
-            for i in self.edges:
-                if i[0] not in assignment.keys() or i[1] not in assignment.keys():
-                    continue
-
-                if assignment[i[0]]==assignment[i[1]]:
-
-                    # print(self.variables[self.variables.index(c)-1])
-
-                    assignment.pop(self.variables[self.variables.index(c)-1], None)
-
-                    return
-
-
+        def backtrack(assignment: dict[str, Any]):
+            # procedure backtrack(P, c) is
+            # if reject(P, c) then return
+            # if accept(P, c) then output(P, c)
+            # s ← first(P, c)
+            # while s ≠ NULL do
+            #     backtrack(P, s)
+            #     s ← next(P, s)
+            # print(assignment)
+            # for i in assignment.keys():
+            #     if assignment[i] not in self.domains[i]:
+            #         print("WTF")
             for i in assignment.keys():
                 for j in assignment.keys():
-                    if i==j:
-                        continue
-                    else:
-                        # handout code for validating constraint
-                        if ((i, j) in self.edges and assignment[i]==assignment[j]) or ((j,i) in self.edges and assignment[i]==assignment[j]):
-                            assignment.pop(self.variables[self.variables.index(c)-1], None)
+                    if assignment[i]==assignment[j]:
+                        if (i,j) in self.edges or (j,i) in self.edges:
+                            # print(assignment.popitem())
+                            assignment.popitem()
                             return
-
-            # check if all variables hav a value, if true return value
-
-            for i in self.variables:
-
-                if i not in assignment.keys():
-
-                    break
-
-            else:
-                
+            if(len(assignment.keys()) == len(self.variables)):
                 return assignment
-
-            # if not try each valid value from its domain
-
-            for i in self.domains[c]:
-                
-                assignment[c] = i
-                print(assignment)
-                # keep trying end options
-
-                if(self.variables.index(c)+1 == len(self.variables)):
-                    a = backtrack(assignment, self.variables[self.variables.index(c)])
-                else:     
-                    a = backtrack(assignment, self.variables[self.variables.index(c)+1])
-                print(a)
-                if a:
-                    return a
-        return backtrack({}, self.variables[0])
+            current = 0
+            if assignment!={}:
+                current = list(assignment.keys())[-1]
+                next = self.variables[self.variables.index(current)+1]
+            else:
+                next = self.variables[0]
+            
+            for i in self.domains[next]:
+                # print(next)
+                # print(current)
+                # print(next)
+                # print(self.domains[next])
+                assignment[next] = i
+                if backtrack(assignment) != None:
+                    return assignment
+        return backtrack({})
 
 
 def alldiff(variables: list[str]) -> list[tuple[str, str]]:
